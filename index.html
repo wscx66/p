@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fließende Gebein | 十九岁诗歌博物馆</title>
     <style>
         :root {
@@ -10,49 +11,90 @@
             --soft-glow: rgba(191, 161, 122, 0.2);
         }
 
-        body, html { margin: 0; padding: 0; background-color: var(--bg-dark); color: #f0f0f0; font-family: "Source Han Serif CN", serif; overflow-x: hidden; }
+        body, html { 
+            margin: 0; padding: 0; 
+            background-color: var(--bg-dark); 
+            color: #f0f0f0; 
+            font-family: "Source Han Serif CN", serif; 
+            overflow-x: hidden;
+            /* 防止手机点击出现蓝色高亮框 */
+            -webkit-tap-highlight-color: transparent; 
+        }
 
         /* --- 背景 --- */
         .space-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at center, #0d0d1a 0%, #050508 100%); }
         .star { position: absolute; background: white; border-radius: 50%; opacity: 0.4; animation: twinkle var(--duration) infinite; }
 
         /* --- 首页画廊 --- */
-        .gallery-section { padding: 60px 20px; display: flex; flex-direction: column; align-items: center; }
-        .gallery-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 60px; max-width: 600px; margin-top: 40px; }
-        .museum-item { text-align: center; }
+        .gallery-section { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        .gallery-grid { 
+            display: grid; 
+            grid-template-columns: repeat(1, 1fr); 
+            gap: 40px; 
+            width: 100%;
+            max-width: 450px; /* 手机端宽度控制 */
+            margin-top: 30px; 
+        }
+        .museum-item { text-align: center; width: 100%; }
         .museum-item img { 
-            width: 100%; aspect-ratio: 1/1; object-fit: cover;
+            width: 100%; 
+            aspect-ratio: 1/1; 
+            object-fit: cover;
             filter: grayscale(0.4) brightness(0.85); 
             border: 1px solid rgba(191, 161, 122, 0.3); 
             transition: 0.8s ease; cursor: pointer;
         }
         .museum-item:hover img { filter: grayscale(0) brightness(1); box-shadow: 0 0 30px var(--soft-glow); border-color: var(--accent-gold); }
-        .chapter-title { color: var(--accent-gold); letter-spacing: 8px; margin-top: 15px; font-size: 0.9rem; opacity: 0.8; font-weight: 200; }
+        .chapter-title { color: var(--accent-gold); letter-spacing: 4px; margin-top: 12px; font-size: 0.85rem; opacity: 0.8; font-weight: 200; }
 
         /* --- 唤醒层 --- */
         #awakening-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); display: none; z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
-        .grid-container { width: 80vh; height: 80vh; aspect-ratio: 1/1; display: none; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
-        .grid-cell { background-size: 300% 300%; filter: blur(25px) brightness(1.2); opacity: 0; transition: 3s; cursor: zoom-in; }
+        
+        /* 关键点2：九宫格容器自适应 */
+        .grid-container { 
+            width: 90vw; 
+            height: 90vw; 
+            max-width: 80vh; 
+            max-height: 80vh; 
+            display: none; 
+            grid-template-columns: repeat(3, 1fr); 
+            grid-template-rows: repeat(3, 1fr); 
+            gap: 2px; /* 手机端增加微小间隙增强氛围 */
+        }
+        .grid-cell { background-size: 300% 300%; filter: blur(20px) brightness(1.2); opacity: 0; transition: 2s; cursor: zoom-in; }
         .grid-cell.active { filter: blur(0px) brightness(1); opacity: 1; }
 
         /* --- 阅读层 --- */
         #reader-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; display: none; background: #000; }
-        .reader-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85vh; height: 85vh; aspect-ratio: 1/1; }
-        .reader-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: 300% 300%; border: 1px solid var(--accent-gold); box-shadow: 0 0 50px var(--soft-glow); opacity: 0; transform: translateY(20px); transition: 1.5s ease; }
+        
+        /* 关键点3：阅读器容器自适应 */
+        .reader-container { 
+            position: absolute; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 95vw; 
+            height: 95vw; 
+            max-width: 90vh; 
+            max-height: 90vh; 
+            aspect-ratio: 1/1; 
+        }
+        .reader-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: 300% 300%; border: 1px solid var(--accent-gold); box-shadow: 0 0 40px var(--soft-glow); opacity: 0; transform: translateY(10px); transition: 1s ease; }
         .reader-content.show { opacity: 1; transform: translateY(0); }
 
-        /* --- 全屏致谢感悟页 --- */
+        /* --- 致谢页自适应 --- */
         #thanks-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 8, 0.95); z-index: 3000;
+            background: rgba(5, 5, 8, 0.98); z-index: 3000;
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 40px; box-sizing: border-box;
+            text-align: center; padding: 30px; box-sizing: border-box;
             transition: opacity 2s ease; opacity: 0;
+            overflow-y: auto; /* 内容多时允许滚动 */
         }
-        .thanks-content { max-width: 700px; line-height: 2; letter-spacing: 3px; color: #d0d0d0; font-size: 1rem; }
-        .thanks-content h3 { color: var(--accent-gold); font-weight: 200; margin-bottom: 30px; letter-spacing: 10px; }
-        .luna-credit { margin-top: 50px; font-size: 0.8rem; color: var(--accent-gold); opacity: 0.7; }
+        .thanks-content { max-width: 600px; line-height: 1.8; letter-spacing: 2px; color: #d0d0d0; font-size: 0.95rem; }
+        .thanks-content h3 { color: var(--accent-gold); font-weight: 200; margin-bottom: 20px; letter-spacing: 6px; font-size: 1.2rem; }
+        .luna-credit { margin-top: 40px; font-size: 0.75rem; color: var(--accent-gold); opacity: 0.7; line-height: 1.5; }
 
+        /* 点击区域调优 */
         .click-zone { position: absolute; top: 0; height: 100%; z-index: 2100; }
         .zone-prev { left: 0; width: 30%; cursor: w-resize; }
         .zone-next { right: 0; width: 30%; cursor: e-resize; }
@@ -60,7 +102,13 @@
 
         @keyframes breathe { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
         @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.7; } }
-        .close-btn { position: absolute; top: 25px; right: 45px; color: var(--accent-gold); font-size: 35px; cursor: pointer; z-index: 4000; }
+        .close-btn { position: absolute; top: 20px; right: 25px; color: var(--accent-gold); font-size: 30px; cursor: pointer; z-index: 4000; }
+
+        /* 针对超小屏手机的微调 */
+        @media (max-width: 380px) {
+            .chapter-title { font-size: 0.75rem; letter-spacing: 2px; }
+            .thanks-content { font-size: 0.85rem; }
+        }
     </style>
 </head>
 <body>
@@ -68,7 +116,7 @@
     <div class="space-bg" id="space"></div>
 
     <div class="gallery-section">
-        <h2 style="font-weight: 200; letter-spacing: 15px; color: var(--accent-gold); margin-bottom: 40px;">Fließende Gebein</h2>
+        <h2 style="font-weight: 200; letter-spacing: 8px; color: var(--accent-gold); margin-bottom: 20px; text-align: center;">Fließende Gebein</h2>
         
         <div class="gallery-grid">
             <div class="museum-item" onclick="openMuseum(0)">
@@ -88,7 +136,7 @@
 
     <div id="awakening-overlay">
         <span class="close-btn" onclick="closeAll()">&times;</span>
-        <div id="prompt" onclick="assemble()" style="color:var(--accent-gold); cursor:pointer; letter-spacing:10px; animation: breathe 3s infinite;">点击此处 · 唤醒骨骼</div>
+        <div id="prompt" onclick="assemble()" style="color:var(--accent-gold); cursor:pointer; letter-spacing:5px; animation: breathe 3s infinite; text-align: center; padding: 0 20px;">点击此处 · 唤醒骨骼</div>
         <div class="grid-container" id="grid-container">
             <script>for(let i=0; i<9; i++) document.write(`<div class="grid-cell" id="cell-${i}" onclick="enterReader(${i})"></div>`);</script>
         </div>
@@ -109,12 +157,13 @@
         <div class="thanks-content">
             <h3>我居然十九岁了</h3>
             <p>
-                正如我在活动发起里所说的，关于那些流动的骨骼，关于破壳而出的瞬间，终于跨过不同时空，在这个略显粗糙的网页里相遇<br>
-                过去一个月我无数次地轻声诵读每一节诗，每一句词，我惊叹于大家笔下的才气，更感激这只漂流瓶能载着我们的共鸣，无声地流经福州、北京、杭州、宁波、无锡、长沙、重庆、温州、海南、天津……<br>
+                正如我在活动发起里所说的，关于那些流动的骨骼，关于破壳而出的瞬间，终于跨过不同时空，在这个略显粗糙的网页里相遇<br><br>
+                过去一个月我无数次地轻声诵读每一节诗，更感激这只漂流瓶能流经福州、北京、杭州、宁波、无锡、长沙、重庆、温州、海南、天津……<br><br>
                 以诗会友，一期一会，<br>
                 亲爱的朋友，我们一定会记得这个春天，那些我们在诗歌里交换的呼吸。<br>
             </p>
-            <div class="luna-credit">致谢 Luna：为这些骨骼赋予流动的色彩，在高数和会计学期中考间隙里做了这些美妙的图片
+            <div class="luna-credit">
+                致谢 Luna：为这些骨骼赋予流动的色彩，在高数和会计学期中考间隙里做了这些美妙的图片<br>
                 这四张图片分别来自我们非常喜爱的专辑！
             </div>
         </div>
@@ -123,9 +172,10 @@
     <script>
         let curCover = 0, curBlock = 0;
 
-        // 星空
+        // 星空生成
         const space = document.getElementById('space');
-        for(let i=0; i<120; i++){
+        const starCount = window.innerWidth < 600 ? 60 : 120; // 手机端减少星星数量提高性能
+        for(let i=0; i<starCount; i++){
             const star = document.createElement('div');
             star.className = 'star';
             star.style.width = star.style.height = Math.random()*2+'px';
@@ -149,7 +199,8 @@
                 const cell = document.getElementById(`cell-${i}`);
                 cell.style.backgroundImage = `url(cover${curCover + 1}.jpg)`;
                 cell.style.backgroundPosition = `${(i % 3) * 50}% ${Math.floor(i / 3) * 50}%`;
-                setTimeout(() => cell.classList.add('active'), i * 150);
+                cell.classList.remove('active'); // 重置动画
+                setTimeout(() => cell.classList.add('active'), i * 120);
             }
         }
 
@@ -160,7 +211,6 @@
         }
 
         function changeBlock(step) {
-            // 如果在终章最后一格点击“下一页”，触发致谢
             if (curCover === 3 && curBlock === 8 && step === 1) {
                 showThanks();
                 return;
@@ -168,19 +218,23 @@
 
             const front = document.getElementById('img-front');
             const back = document.getElementById('img-back');
+            
             back.style.transition = 'none';
             back.style.backgroundImage = front.style.backgroundImage;
             back.style.backgroundPosition = front.style.backgroundPosition;
             back.style.opacity = '1';
             back.style.transform = 'translateY(0)';
+            
             front.style.transition = 'none';
             front.classList.remove('show');
+            
             curBlock = (curBlock + step + 9) % 9;
+            
             setTimeout(() => {
-                front.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+                front.style.transition = 'opacity 1s ease, transform 1s ease';
                 updateReaderVisuals();
                 front.classList.add('show');
-                back.style.transition = 'opacity 1.5s ease';
+                back.style.transition = 'opacity 1s ease';
                 back.style.opacity = '0';
             }, 50);
         }
